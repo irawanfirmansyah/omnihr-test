@@ -11,6 +11,8 @@ function Directory({
   title: string;
   parentTitle: string | null;
 }) {
+  const { state, handleClickDirectory } = useDirectoryContext();
+
   const isRoot = title === "root" && parentTitle === null;
 
   // Path will be used for API call to query filesystem
@@ -21,7 +23,7 @@ function Directory({
     ? title
     : `${parentTitle}/${title}`;
 
-  const { state, handleClickDirectory } = useDirectoryContext();
+  const isDirectoryOpen = state.get(path)?.open;
 
   const renderFileEntries = () => {
     const directoryState = state.get(path);
@@ -34,12 +36,7 @@ function Directory({
         return directoryState.entries.map((v) => {
           if (v.type === "file") {
             return (
-              <DirectoryFileItem
-                key={v.name}
-                onClick={() => {
-                  console.log({ fileName: v.name });
-                }}
-              >
+              <DirectoryFileItem key={v.name} id={v.name} dirPath={path}>
                 {v.name}
               </DirectoryFileItem>
             );
@@ -54,13 +51,13 @@ function Directory({
   return (
     <DirectoryContainer>
       <DirectoryIcon
-        onClick={() => handleClickDirectory(path)}
         // Root is open by default
-        expanded={state.get(path)?.open}
+        expanded={isDirectoryOpen}
+        onClick={() => handleClickDirectory(path)}
       />
       <div>
         <DirectoryTitle>{title}</DirectoryTitle>
-        {state.get(path)?.open ? renderFileEntries() : null}
+        {isDirectoryOpen ? renderFileEntries() : null}
       </div>
     </DirectoryContainer>
   );
