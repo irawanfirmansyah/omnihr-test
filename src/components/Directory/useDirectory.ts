@@ -47,7 +47,7 @@ const useDirectoryReducer = (
   }
 };
 
-export function useDirectory(id: string, initialExpanded?: boolean) {
+export function useDirectory(id: string, initialExpanded = false) {
   const [expanded, setExpanded] = useState<boolean>(Boolean(initialExpanded));
 
   const [state, dispatch] = useReducer(useDirectoryReducer, {
@@ -61,6 +61,7 @@ export function useDirectory(id: string, initialExpanded?: boolean) {
   });
 
   const initData = async () => {
+    if (!expanded) return;
     dispatch({ type: "SET_LOADING", payload: true });
     const res = await getDirectoryEntries({ path: id });
     console.log({ res });

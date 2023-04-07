@@ -1,31 +1,68 @@
-import { useEffect } from "react";
-import { DirectoryProps } from "./types";
-import { useDirectory } from "./useDirectory";
+import { DirectoryFileItem } from "../DirectoryFileItem";
+import { DirectoryContainer } from "../DirectoryContainer";
+import { DirectoryIcon } from "../DirectoryIcon";
+import { DirectoryTitle } from "../DirectoryTitle";
+import { useDirectoryContext } from "@/contexts/DirectoryContext";
 
-function Directory({ id, defaultExpanded }: DirectoryProps) {
-  const { expanded, initData } = useDirectory(id, defaultExpanded);
+function Directory({
+  title,
+  parentTitle,
+}: {
+  title: string;
+  parentTitle: string | null;
+}) {
+  const isRoot = title === "root" && parentTitle === null;
 
-  useEffect(() => {
-    initData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Path will be used for API call to query filesystem
+  // and get entries from state
+  const path = isRoot
+    ? "root"
+    : parentTitle === "root"
+    ? title
+    : `${parentTitle}/${title}`;
+
+  const { state, handleClickDirectory } = useDirectoryContext();
+
+  const renderFileEntries = () => {
+    const directoryState = state.get(path);
+
+    if (directoryState !== undefined) {
+      if (directoryState.open) {
+        if (directoryState.entries.length <= 0) {
+          return <p>... Empty Folder ...</p>;
+        }
+        return directoryState.entries.map((v) => {
+          if (v.type === "file") {
+            return (
+              <DirectoryFileItem
+                key={v.name}
+                onClick={() => {
+                  console.log({ fileName: v.name });
+                }}
+              >
+                {v.name}
+              </DirectoryFileItem>
+            );
+          }
+          return <Directory key={v.name} title={v.name} parentTitle={path} />;
+        });
+      }
+    }
+    return null;
+  };
 
   return (
-    <div style={{ display: "flex", alignItems: "center", columnGap: "8px" }}>
-      <svg
-        style={{
-          transition: "transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-          transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
-        }}
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-      >
-        <path d="M13 7v-6l11 11-11 11v-6h-13v-10z" />
-      </svg>
-      <p>{id}</p>
-    </div>
+    <DirectoryContainer>
+      <DirectoryIcon
+        onClick={() => handleClickDirectory(path)}
+        // Root is open by default
+        expanded={state.get(path)?.open}
+      />
+      <div>
+        <DirectoryTitle>{title}</DirectoryTitle>
+        {state.get(path)?.open ? renderFileEntries() : null}
+      </div>
+    </DirectoryContainer>
   );
 }
 

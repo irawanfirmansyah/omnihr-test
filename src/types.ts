@@ -1,14 +1,14 @@
-export type FileSystemDirectory = {
+export type Directory = {
   id: string;
-  entries: FileSystemEntry[];
+  entries: DirectoryEntry[];
 };
 
-export type FileSystemEntry = {
+export type DirectoryEntry = {
   name: string;
   type: "directory" | "file";
 };
 
-export type FileSystemContent = {
+export type FileEntry = {
   id: string;
   contents: string;
 };

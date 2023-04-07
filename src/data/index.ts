@@ -1,4 +1,4 @@
-import { FileSystemDirectory, FileSystemContent } from "@/types";
+import { Directory, FileEntry } from "@/types";
 
 const API_URL = "http://localhost:8080/";
 
@@ -8,7 +8,7 @@ const ENDPOINTS = {
 
 const defaultPath = "root";
 
-export function getDirectoryEntries(
+export function getDirectory(
   { path }: { path?: string } = { path: defaultPath }
 ) {
   const url = new URL(`${API_URL}${ENDPOINTS.fileSystem}`);
@@ -26,11 +26,11 @@ export function getDirectoryEntries(
       }
       throw new Error();
     })
-    .then((data: FileSystemDirectory) => {
+    .then((data: Directory) => {
       return data;
     })
     .catch((_err) => {
-      const emptyDir: FileSystemDirectory = {
+      const emptyDir: Directory = {
         id: url.searchParams.get(path || defaultPath)?.toString() || "",
         entries: [],
       };
@@ -38,7 +38,7 @@ export function getDirectoryEntries(
     });
 }
 
-export function getFileContent(path: string): Promise<FileSystemContent> {
+export function getFileEntryContent(path: string): Promise<FileEntry> {
   const url = new URL(`${API_URL}${ENDPOINTS.fileSystem}`);
   url.searchParams.append("path", path);
   return fetch(url.href, {
@@ -53,11 +53,11 @@ export function getFileContent(path: string): Promise<FileSystemContent> {
       }
       throw new Error();
     })
-    .then((data: FileSystemContent) => {
+    .then((data: FileEntry) => {
       return data;
     })
     .catch((_err) => {
-      const emptyFile: FileSystemContent = {
+      const emptyFile: FileEntry = {
         id: url.searchParams.get(path || defaultPath)?.toString() || "",
         contents: "",
       };
